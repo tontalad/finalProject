@@ -12,22 +12,23 @@ def to_objectid(value):
     return value
 
 class SubjectGroup(BaseModel):
-    BIT: Optional[str] = None
-    WEB: Optional[str] = None
-    Network: Optional[str] = None
+    BIT: Optional[str] = Field(default="0")
+    WEB: Optional[str] = Field(default="0")
+    Network: Optional[str] = Field(default="0")
 
-class Subject(BaseModel):
+class SubjectCreate(BaseModel):
     name: str = Field(alias="SubjectName")
     description: str = Field(None, alias="Description")
-    teacher: List[str] = Field(default_factory=list, alias="Teachers")
+    teacher: Optional[List[PyObjectId]] = Field(default_factory=list, alias="Teachers")
+    student: Optional[List[PyObjectId]] = Field(default_factory=list, alias="Students")
     number_of_students: int = Field(alias="NumberOfStudent")
     section: str = Field(alias="Section")
     subject_semester: str = Field(alias="SubjectSemester")
     subject_year: str = Field(alias="SubjectYear")
     group: Optional[SubjectGroup] = Field(None, alias="Group")
-    created_at: Optional[str] = Field(default_factory=datetime.now, alias="CreatedAt")
-    updated_at: Optional[str] = Field(None, alias="UpdatedAt")
-    deleted_at: Optional[str] = Field(None, alias="DeletedAt")
+    created_at: Optional[datetime] = Field(default_factory=datetime.now, alias="CreatedAt")
+    updated_at: Optional[datetime] = Field(None, alias="UpdatedAt")
+    deleted_at: Optional[datetime] = Field(None, alias="DeletedAt")
 
     class Config:
         populate_by_name = True
@@ -36,20 +37,23 @@ class Subject(BaseModel):
 class SubjectUpdate(BaseModel):
     name: str = Field(None, alias="SubjectName")
     description: str = Field(None, alias="Description")
-    teacher: Optional[List[PyObjectId]] = Field(default_factory=list, alias="Teachers")
+    teachers: Optional[List[PyObjectId]] = Field(default_factory=list, alias="Teachers")
+    students: Optional[List[PyObjectId]] = Field(default_factory=list, alias="Students")
     number_of_students: int = Field(None, alias="NumberOfStudent")
     section: str = Field(None, alias="Section")
     subject_semester: str = Field(None, alias="SubjectSemester")
     subject_year: str = Field(None, alias="SubjectYear")
     group: Optional[SubjectGroup] = Field(None, alias="Group")
-    created_at: Optional[str] = Field(None, alias="CreatedAt")
-    updated_at: Optional[str] = Field(default_factory=datetime.now, alias="CreatedAt")
-    deleted_at: Optional[str] = Field(None, alias="DeletedAt")
+    created_at: Optional[datetime] = Field(None, alias="CreatedAt")
+    updated_at: Optional[datetime] = Field(default_factory=datetime.now, alias="CreatedAt")
+    deleted_at: Optional[datetime] = Field(None, alias="DeletedAt")
 
     @model_validator(mode="before")
     def convert_teachers_to_objectid(cls, values):
         if "Teachers" in values:
             values["Teachers"] = [to_objectid(t) for t in values["Teachers"]]
+        if "Students" in values:
+            values["Students"] = [to_objectid(t) for t in values["Students"]]
         return values
     
     class Config:
@@ -60,7 +64,8 @@ class SubjectResponse(BaseModel):
     id: Annotated[str, Field(None, alias="_id")]
     name: str = Field(alias="SubjectName")
     description: str | None = Field(None, alias="Description")
-    teacher: Optional[List[str]] = Field(None, alias="Teachers")
+    teachers: Optional[List[PyObjectId]] = Field(default_factory=list, alias="Teachers")
+    students: Optional[List[PyObjectId]] = Field(default_factory=list, alias="Students")
     number_of_students: int = Field(alias="NumberOfStudent")
     section: str = Field(alias="Section")
     subject_semester: str = Field(alias="SubjectSemester")

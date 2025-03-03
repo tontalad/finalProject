@@ -3,12 +3,18 @@ from db.db import get_collection, database
 from models.user import UserListResponse, UserResponse
 from repositories.student_repo import StudentRepository
 from services.student_service import StudentService
+from infrastructure.auth import get_current_user
 
 router = APIRouter()
 
 def get_student_service():
     repo = StudentRepository(database)
     return StudentService(repo)
+
+@router.get("/me")
+async def read_users_me(current_user: UserResponse = Depends(get_current_user)):
+    return current_user
+
 
 @router.get("/get-students", response_model=UserListResponse)
 async def get_students(service: StudentService = Depends(get_student_service)):
